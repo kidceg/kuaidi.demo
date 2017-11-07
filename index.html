@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Demo</title>
+<style>
+body, input, select, button, h1 {
+	font-size: 28px;
+	line-height:1.7;
+}
+
+
+</style>	
+</head>
+
+<body>
+
+<h1>快递查询</h1>
+
+<label>快递编号：</label>
+<input type="text" id="keynum" />
+<button id="search">查询</button>
+<p id="searchResult"></p>
+
+
+
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script>
+$.support.cors = true;
+var params = {
+	"id" : "XDB2gzsjbsgsdqswapANo0I_70317229",
+	"com" : "shentong",
+	"nu" : "3341162529069",
+	"show" : "json",
+};
+$("#search").on('click', function(){
+$.ajax({
+	type:"GET",
+	url:"http://q.kdpt.net/api?nu=" + $("#keynum").val(),
+	dataType:"jsonp",
+	jsonp:"callback",
+	jsonpCallback:"success_jsonpCallback",
+	data:params,
+	success:function(json) {
+		if (json) {
+			$("#searchResult").css("font-size","12px").html(datafor(json));
+		} else {
+			$("#searchResult").html("没有该订单");
+		}
+
+	},
+	error:function (error) {
+		$("#searchResult").html("没有该订单");
+		console.log(error);
+	}
+});
+});
+
+function datafor(json) {
+	var dataresult = "快递公司："+json.com + "<br/>" + "<hr/>";
+	var len = json.data.length;
+   for(var i = len-1; i >= 0 ; i--){
+     dataresult += json.data[i].context + "<br/>"+ json.data[i].time + "<hr/>"
+   }
+   return dataresult;
+}
+
+$("#keynum").on('focus', function(){
+$("#keynum").css("box-shadow","0px 0px 2px #305283")
+});
+$("#keynum").on('blur', function(){
+$("#keynum").css("box-shadow","")
+});
+
+</script>
+</body>
+</html>
