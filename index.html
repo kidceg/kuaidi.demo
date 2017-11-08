@@ -4,60 +4,154 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Demo</title>
 <style>
-body, input, select, button, h1 {
-	font-size: 28px;
-	line-height:1.7;
+
+button{
+	border-radius: 2px;
+	background-color: white;
+	color: #393837;
+	border: 1px solid #393837;	
+	box-shadow: 0px 1px 1px gray;
+	cursor: pointer;
 }
 
+.company{
+	margin-top: 50px;
+	margin-left: 50px;
+}
+.company button{
+	margin: 10px 20px;
+	font-size:18px;
+}
 
+.findnum{
+	margin: 20px 70px 20px 70px;
+}
+
+.findnum input,button{
+	margin-right: 10px;
+	font-size: 18px;
+}
+
+#keynum{
+	border: 1px solid #51504F;
+	border-radius: 2px;
+}
+
+.findnum p{
+	font-size: 14px;
+}
+
+.cborder{
+	color: #243F69;
+	border: 1px solid #447FED;
+	box-shadow: 0 0 3px #6792C0;
+}
 </style>	
 </head>
 
 <body>
+<!-- 三个快递公司按钮 -->
+<div class="company">
+	<button id="st" class="c1">申通快递</button>
+	<button id="yd" class="c2">韵达快递</button>
+	<button id="sf" class="c3">顺丰快递</button>
+</div>
 
-<h1>快递查询</h1>
-
-<label>快递编号：</label>
-<input type="text" id="keynum" />
-<button id="search">查询</button>
-<p id="searchResult"></p>
-
+<!-- 输入框和查询按钮 -->
+<div class="findnum">
+	<!-- 输入框 -->
+	<input type="text" id="keynum" placeholder="请输入运单号" />
+	<!-- 查询按钮 -->
+	<button id="search">查询</button>
+	<!-- 查询结果 -->
+	<p id="searchResult"></p>
+</div>
 
 
 <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 <script>
-$.support.cors = true;
+// 三个快递按钮被点击时的样式切换
+var pre;//声明变量保存上一个点击的按钮
+var get_com = "";
+var com_code = '';
+$(".company button").on("click",function() {
+   if(!$(this).hasClass('cborder')){
+   	$(".c"+pre).removeClass('cborder');
+   	$(this).addClass('cborder');
+   	pre = $(this).attr("class").match(/\d/);
+
+   	get_com = $(".c"+pre).text();
+	if(get_com === "申通快递") {
+		com_code = "shentong";
+	} else if (get_com === "韵达快递") {
+		com_code = "yunda";
+	} else {
+		com_code = "shunfeng";
+	}
+	   }
+});
+
+
+// 输入框对焦的时候输入框样式改变
+$("#keynum").on('focus', function(){
+$("#keynum").css("box-shadow","0px 0px 3px #305283")
+});
+// 输入框失去焦点的时候输入框样式还原
+$("#keynum").on('blur', function(){
+$("#keynum").css("box-shadow","")
+});
+
+
+// ajax部分
+var get_nu = $("#keynum").val();
+
 var params = {
 	"id" : "XDB2gzsjbsgsdqswapANo0I_70317229",
-	"com" : "shentong",
-	"nu" : "3341162529069",
+	"com" : com_code,
+	"nu" : get_nu,
 	"show" : "json",
 };
-$("#search").on('click', function(){
-$.ajax({
-	type:"GET",
-	url:"http://q.kdpt.net/api?nu=" + $("#keynum").val(),
-	dataType:"jsonp",
-	jsonp:"callback",
-	jsonpCallback:"success_jsonpCallback",
-	data:params,
-	success:function(json) {
-		if (json) {
-			$("#searchResult").css("font-size","12px").html(datafor(json));
-		} else {
-			$("#searchResult").html("没有该订单");
-		}
+// 当点击查询按钮
+$("#search").on('click', function() {
+	// 判断是否有选择快递公司
+  if( com_code !== "") {
 
-	},
-	error:function (error) {
-		$("#searchResult").html("没有该订单");
-		console.log(error);
-	}
-});
+	// 判断输入内容是否为空
+	if( $("#keynum").val() !== "") {
+	$.ajax({
+		type:"GET",
+		url:"http://q.kdpt.net/api?com=com_code&nu=" + $("#keynum").val(),
+		dataType:"jsonp",
+		jsonp:"callback",
+		jsonpCallback:"success_jsonpCallback",
+		data:params,
+		success:function(json) {
+			$("#searchResult").css("font-size","12px").html(datafor(json));
+			// if (json) {
+			// 	$("#searchResult").css("font-size","12px").html(datafor(json));
+			// } else {
+			// 	$("#searchResult").html("没有该订单");
+			// }
+
+		},
+		error:function (error) {
+			$("#searchResult").html("没有该订单");
+			console.log(error);
+		}
+	 });		
+	} else {
+		// 输入内容为空的时候
+		alert("请输入运单号");
+	}	
+  } else {
+  	alert("请选择快递公司");
+  }
+
+
 });
 
 function datafor(json) {
-	var dataresult = "快递公司："+json.com + "<br/>" + "<hr/>";
+	var dataresult = '';
 	var len = json.data.length;
    for(var i = len-1; i >= 0 ; i--){
      dataresult += json.data[i].context + "<br/>"+ json.data[i].time + "<hr/>"
@@ -65,12 +159,7 @@ function datafor(json) {
    return dataresult;
 }
 
-$("#keynum").on('focus', function(){
-$("#keynum").css("box-shadow","0px 0px 2px #305283")
-});
-$("#keynum").on('blur', function(){
-$("#keynum").css("box-shadow","")
-});
+
 
 </script>
 </body>
