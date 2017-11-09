@@ -103,16 +103,17 @@ $("#keynum").css("box-shadow","")
 
 
 // ajax部分
-var get_nu = $("#keynum").val();
 
-var params = {
-	"id" : "XDB2gzsjbsgsdqswapANo0I_70317229",
-	"com" : com_code,
-	"nu" : get_nu,
-	"show" : "json",
-};
 // 当点击查询按钮
 $("#search").on('click', function() {
+	var get_nu = $("#keynum").val();
+
+	var params = {
+		"id" : "XDB2gzsjbsgsdqswapANo0I_70317229",
+		"com" : com_code,
+		"nu" : get_nu,
+		"show" : "json",
+	};
 	// 判断是否有选择快递公司
   if( com_code !== "") {
 
@@ -120,29 +121,34 @@ $("#search").on('click', function() {
 	if( $("#keynum").val() !== "") {
 	$.ajax({
 		type:"GET",
-		url:"http://q.kdpt.net/api?com=com_code&nu=" + $("#keynum").val(),
+		url:"http://q.kdpt.net/api",
 		dataType:"jsonp",
 		jsonp:"callback",
 		jsonpCallback:"success_jsonpCallback",
 		data:params,
 		success:function(json) {
-			$("#searchResult").css("font-size","12px").html(datafor(json));
-			// if (json) {
-			// 	$("#searchResult").css("font-size","12px").html(datafor(json));
-			// } else {
-			// 	$("#searchResult").html("没有该订单");
-			// }
+			// $("#searchResult").css("font-size","12px").html(datafor(json));
+			if(json.data.length !== 0){
+				$("#searchResult").css("font-size","12px").html(datafor(json));
+			} else {
+				$("#searchResult").html(json.message);
+			}
 
 		},
 		error:function (error) {
 			$("#searchResult").html("没有该订单");
 			console.log(error);
-		}
-	 });		
+		},
+
+	 });//$.ajax()结束
+
+    // 判断输入内容是否为空的
 	} else {
 		// 输入内容为空的时候
 		alert("请输入运单号");
-	}	
+	}
+
+	// 判断是否有选择快递公司的	
   } else {
   	alert("请选择快递公司");
   }
